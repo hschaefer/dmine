@@ -1,0 +1,42 @@
+# --- Python ---
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- dmine local state -------------------------------------------
+# NEVER commit these: the archive is other people's message data and the
+# profile contains a live Discord session. Keep them out of the repo even
+# when DMINE_* env vars point inside it.
+archive.sqlite
+archive.sqlite-wal
+archive.sqlite-shm
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+exports/
+media/
+profile/
+capture.lock
+*.lock
+*.pid
+
+# QR-code PNGs from `dmine login` (they are a live login ticket)
+qr*.png
+*.png
+
+# --- local scratch / one-off debugging ---
+debug_dom*.py
+scratch_*.py
+smoke_servers.py
+
+# release tooling artifacts (patches pulled back from the public mirror)
+tools/release/imported/

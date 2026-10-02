@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dmine"
+dynamic = ["version"]
+description = "Bot-free Discord channel archiver & miner (CLI + MCP server): DOM-only capture via Playwright into SQLite"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "AGPL-3.0-or-later"
+license-files = ["LICENSE"]
+authors = [{ name = "dmine contributors" }]
+keywords = ["discord", "archive", "scraper", "playwright", "sqlite", "mcp", "full-text-search"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Internet",
+    "Topic :: Text Processing :: Indexing",
+]
+dependencies = [
+    "playwright>=1.40",
+    "httpx>=0.27",
+    "mcp>=1.2,<2",
+    "websockets>=12",
+    "cryptography>=41",
+    "qrcode>=7.4",
+    "pillow>=10",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.urls]
+Homepage = "https://github.com/hschaefer/dmine"
+Repository = "https://github.com/hschaefer/dmine"
+Issues = "https://github.com/hschaefer/dmine/issues"
+
+[project.scripts]
+dmine = "dmine.cli:main"
+dmine-mcp = "dmine.mcp_server:main"
+
+[tool.setuptools.packages.find]
+include = ["dmine*"]
+
+[tool.setuptools.dynamic]
+# Single source of truth: the version lives in dmine/__init__.py and is
+# read statically at build time, so `--version` and the package metadata can
+# never disagree.
+version = { attr = "dmine.__version__" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
