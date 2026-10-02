@@ -5,7 +5,7 @@
 Commands:
   scan                 list visible servers & channels (writes them to the DB)
   capture <channel>    incremental capture since watermark (--full for backfill)
-  search <query>       full-text search over the archive
+  search <query>       substring search over the archive
   export <channel>     export as jsonl or markdown
   status               watermark / message count per channel
   channels             channels known to the archive
@@ -124,7 +124,8 @@ def cmd_browser(args) -> int:
             print(f"# profile: {DEFAULT_PROFILE}")
             print("# if the window shows a login page, log in once — the session persists while the daemon runs")
         else:
-            print("# could not start browser daemon", file=sys.stderr)
+            print("# could not start browser daemon — no Chrome/Chromium found?", file=sys.stderr)
+            print("# install Google Chrome or Chromium, or run: playwright install chromium", file=sys.stderr)
             return 1
     elif args.action == "status":
         print("running" if daemon_health() else "not running")
@@ -316,7 +317,7 @@ def main(argv=None) -> int:
     p.add_argument("--headless", action="store_true")
     p.set_defaults(func=cmd_capture)
 
-    p = sub.add_parser("search", help="full-text search over the archive")
+    p = sub.add_parser("search", help="substring search over the archive")
     p.add_argument("query")
     p.add_argument("--channel", help="restrict to a channel ID/URL")
     p.add_argument("--server", help="restrict to a server (ID or name)")

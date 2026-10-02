@@ -332,7 +332,7 @@ def recent(
 
 @mcp.tool()
 def search(query: str, server: str | None = None, channel: str | None = None, limit: int = 50) -> dict:
-    """Full-text search over the archive (message content, embeds, author).
+    """Substring search over the archive (message content, embeds, author).
 
     Without scope this spans every archived server. Use server= or channel=
     to restrict; every hit carries its server_id/server_name.

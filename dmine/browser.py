@@ -20,6 +20,7 @@ profile on a trusted machine.
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 import time
 from pathlib import Path
@@ -33,14 +34,41 @@ DISCORD_APP = "https://discord.com/app"
 
 
 def resolve_executable() -> str | None:
-    for cand in (
+    """Path to a Chrome/Chromium binary, or None if none can be found.
+
+    Well-known install locations first, then PATH. Covers Linux, macOS and
+    Windows: with a Linux-only list the daemon path could never work elsewhere,
+    and the bundled-Chromium fallback in DiscordBrowser.start() was unreachable
+    because start_daemon() raised instead of returning False.
+    """
+    home = Path.home()
+    candidates = (
+        # Linux
         "/usr/bin/google-chrome",
         "/usr/bin/google-chrome-stable",
         "/usr/bin/chromium-browser",
         "/usr/bin/chromium",
-    ):
-        if os.path.exists(cand):
-            return cand
+        # macOS
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "/Applications/Chromium.app/Contents/MacOS/Chromium",
+        str(home / "Applications/Google Chrome.app/Contents/MacOS/Google Chrome"),
+        str(home / "Applications/Chromium.app/Contents/MacOS/Chromium"),
+        # Windows (%VAR% expands only there, so these are inert elsewhere)
+        os.path.expandvars(r"%PROGRAMFILES%\Google\Chrome\Application\chrome.exe"),
+        os.path.expandvars(r"%PROGRAMFILES(X86)%\Google\Chrome\Application\chrome.exe"),
+        os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe"),
+    )
+    for cand in candidates:
+        try:
+            if cand and os.path.exists(cand):
+                return cand
+        except OSError:
+            continue
+    for name in ("google-chrome", "google-chrome-stable", "chromium",
+                 "chromium-browser", "chrome", "chrome.exe"):
+        found = shutil.which(name)
+        if found:
+            return found
     return None
 
 
@@ -68,7 +96,9 @@ def start_daemon(port: int = DEFAULT_PORT, profile: str | Path = DEFAULT_PROFILE
         return True
     exe = resolve_executable()
     if not exe:
-        raise RuntimeError("no chrome/chromium executable found")
+        # Not fatal: DiscordBrowser.start() falls back to Playwright's bundled
+        # Chromium. Raising here made that fallback unreachable.
+        return False
     profile = Path(profile)
     profile.mkdir(parents=True, exist_ok=True)
     cmd = [
@@ -162,7 +192,16 @@ class DiscordBrowser:
             )
             if exe:
                 kwargs["executable_path"] = exe
-            self.ctx = self._pw.chromium.launch_persistent_context(**kwargs)
+            try:
+                self.ctx = self._pw.chromium.launch_persistent_context(**kwargs)
+            except Exception as exc:
+                if not exe:
+                    raise RuntimeError(
+                        "no usable browser found: install Google Chrome or Chromium, "
+                        "or run 'playwright install chromium' to use Playwright's "
+                        "bundled build"
+                    ) from exc
+                raise
             self.page = self.ctx.pages[0] if self.ctx.pages else self.ctx.new_page()
             return self
         except Exception:

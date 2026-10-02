@@ -26,7 +26,16 @@ SQLite archive plus the downloaded media files.
 
 ## Install
 
-Requires Python 3.10+ and a Chromium-based browser that Playwright can drive.
+Requires Python 3.10+ and **Google Chrome or Chromium installed on the system**.
+dmine drives *your* browser and starts it as a long-running background
+daemon, so a single login survives across runs (that is what the persistent
+profile and the `--remote-debugging-port` daemon are for). Chrome/Chromium is
+looked up in the usual install locations and on `PATH`.
+
+If none is found it falls back to Playwright's bundled Chromium
+(`playwright install chromium`), which works but does not give you the
+long-lived daemon — the browser then starts and stops with each command.
+
 Installed from source — there is no package on PyPI:
 
 ```bash
@@ -102,6 +111,11 @@ dmine status [--channel <id>]               # watermark per channel
 dmine channels                              # known channels
 ```
 
+`search` is a case-insensitive substring match over message content, embeds and
+author names — not a tokenised/ranked full-text index, and the searched columns
+are unindexed, so a hit is found by scanning the archive. Fine for a personal
+archive; expect it to get slower as the DB grows.
+
 ## Use as an MCP server
 
 `dmine` is also an [MCP](https://modelcontextprotocol.io) server (stdio
@@ -131,7 +145,7 @@ The tools fall into two groups:
 | Tool | Needs the browser session | What it does |
 |---|---|---|
 | `recent` | no | most recent archived messages of a channel |
-| `search` | no | full-text search over content, embeds and author |
+| `search` | no | substring search over content, embeds and author |
 | `status` | no | total messages, per-channel watermark and counts |
 | `servers` | no | known servers (id, name, channel and message counts) |
 | `channels` | no | known channels, optionally of one server |

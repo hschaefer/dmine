@@ -3,6 +3,12 @@
 Synced from the private development repository. Each entry is a snapshot;
 individual commits are not mirrored.
 
+## 2026-10-02 (75525845)
+
+- release: 0.2.1
+- docs: state the real browser requirement; stop calling substring search full-text
+- browser: find Chrome/Chromium on any platform, and degrade instead of aborting
+
 ## 2026-10-02 (69f626ff)
 
 - packaging: single-source the version
